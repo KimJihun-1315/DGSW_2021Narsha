@@ -39,7 +39,7 @@ void loop() {
     doMoveX();
   }else if (XEnd == 1){
     digitalWrite(X_DI, LOW);
-    for(int i = 0; i<1000; i++){
+    for(int i = 0; i<100; i++){
       doMoveX();
     }
   }
