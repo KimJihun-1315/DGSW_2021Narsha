@@ -7,7 +7,29 @@
 #define Y_STEP 22
 #define Y_STOP 19
 
+unsigned long curr_micros = 0;
+unsigned long curr_millis = 0;
 
+unsigned long pre_micros_x = 0;
+unsigned long pre_millis_x = 0;
+char motor_stop_x = 1;
+char step_toggle_x = 0;
+char dir_toggle_x = 0;
+
+unsigned long pre_micros_y = 0;
+unsigned long pre_millis_y = 0;
+char motor_stop_y = 1;
+char step_toggle_y = 0;
+char dir_toggle_y = 0;
+
+unsigned int step_count_x = 0;
+unsigned int step_count_y = 0;
+
+char x_stopped = 1;
+char y_stopped = 1;
+char all_stop = 0;
+
+//============================================
 void setup() {
   Serial.begin(9600);
 
@@ -24,37 +46,21 @@ void setup() {
   digitalWrite(X_DIR, HIGH);
   digitalWrite(Y_DIR, HIGH);
   digitalWrite(XYE_EN, LOW);
+
+  motor_stop_x = 0;
+  step_count_x = 0;
 }
+//===========================================
 
 
 //===========================================
-
-unsigned long curr_micros = 0;
-unsigned long curr_millis = 0;
-
-unsigned long pre_micros_x = 0;
-unsigned long pre_millis_x = 0;
-char motor_stop_x = 0;
-char step_toggle_x = 0;
-char dir_toggle_x = 0;
-
-unsigned long pre_micros_y = 0;
-unsigned long pre_millis_y = 0;
-char motor_stop_y = 0;
-char step_toggle_y = 0;
-char dir_toggle_y = 0;
-
-unsigned int step_count_x = 0;
-unsigned int step_count_y = 0;
-
-
 void loop() {
   curr_micros = micros();
   curr_millis = millis();
 
 
 //--------------------------------------------
-//                X control
+//                X move
 //--------------------------------------------
   if(curr_micros - pre_micros_x>200){
     pre_micros_x = curr_micros;
@@ -74,31 +80,32 @@ void loop() {
         if(step_count_x>4000){
           step_count_x=0;
           motor_stop_x=1;
+          x_stopped = 1;
         }
       }
     }
   }
 
 
-//--------------------------------------------
-  if (curr_millis - pre_millis_x > 1000)
-  {
-    pre_millis_x = curr_millis;
-    if(dir_toggle_x == 0)
-    {
-      dir_toggle_x = 1;
-      digitalWrite(X_DIR, LOW);
-    }
-    else if(dir_toggle_x == 1){
-      dir_toggle_x = 0;
-      digitalWrite(X_DIR, HIGH);
-    }
-  }
-//--------------------------------------------
+// //--------------------------------------------
+//   if (curr_millis - pre_millis_x > 1000)
+//   {
+//     pre_millis_x = curr_millis;
+//     if(dir_toggle_x == 0)
+//     {
+//       dir_toggle_x = 1;
+//       digitalWrite(X_DIR, LOW);
+//     }
+//     else if(dir_toggle_x == 1){
+//       dir_toggle_x = 0;
+//       digitalWrite(X_DIR, HIGH);
+//     }
+//   }
+// //--------------------------------------------
 
 
 //============================================
-//                Y control
+//                Y move
 //============================================
 
 //--------------------------------------------
@@ -126,22 +133,39 @@ void loop() {
   }
 //--------------------------------------------
 
-//--------------------------------------------
-  if (curr_millis - pre_millis_y > 1000)
-  {
-    pre_millis_y = curr_millis;
-    if(dir_toggle_y == 0)
-    {
-      dir_toggle_y = 1;
-      digitalWrite(Y_DIR, LOW);
-    }
-    else if(dir_toggle_y == 1){
-      dir_toggle_y = 0;
-      digitalWrite(Y_DIR, HIGH);
-    }
-  }
-//---------------------------------------------
+// //--------------------------------------------
+//   if (curr_millis - pre_millis_y > 1000)
+//   {
+//     pre_millis_y = curr_millis;
+//     if(dir_toggle_y == 0)
+//     {
+//       dir_toggle_y = 1;
+//       digitalWrite(Y_DIR, LOW);
+//     }
+//     else if(dir_toggle_y == 1){
+//       dir_toggle_y = 0;
+//       digitalWrite(Y_DIR, HIGH);
+//     }
+//   }
+// //---------------------------------------------
 
+
+//---------------------------------------------
+if(x_stopped == 1 && motor_stop_y==1 && all_stop == 0)
+{
+  motor_stop_y = 0;
+  step_count_y = 0;
+
+}
+else if (x_stopped == 1 && y_stopped == 1 && all_stop == 0){
+  motor_stop_x = 0;
+  step_count_x = 0;
+
+  motor_stop_y = 0;
+  step_count_y = 0;
+  all_stop = 1;
+}
+//---------------------------------------------
 
 
 //---------------------------------------------
@@ -153,4 +177,6 @@ void loop() {
   if(in_value_y == 1){
       motor_stop_y = 1;
   }
+//---------------------------------------------
 }
+//=============================================
